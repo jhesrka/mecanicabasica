@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso de Administrador - Taller Mecánico</title>
+    <title>Acceso de Administrador - <?= htmlspecialchars($sistema->nombre_sistema ?? 'Taller Pro') ?></title>
+    
+    <!-- Favicon Dinámico -->
+    <?php 
+    $faviconUrl = !empty($sistema->logo) && file_exists(__DIR__ . '/../../../public/uploads/logo/' . $sistema->logo)
+        ? '/uploads/logo/' . htmlspecialchars($sistema->logo)
+        : null;
+    ?>
+    <?php if ($faviconUrl): ?>
+        <link rel="icon" href="<?= $faviconUrl ?>" type="image/<?= pathinfo($sistema->logo, PATHINFO_EXTENSION) === 'webp' ? 'webp' : 'png' ?>">
+        <link rel="apple-touch-icon" href="<?= $faviconUrl ?>">
+    <?php endif; ?>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,8 +131,15 @@
             filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 2px 10px rgba(255, 106, 0, 0.6));
         }
 
+        .brand-title-wrap .title-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+
         .brand-title-wrap h1 {
-            font-size: 2.3rem;
+            font-size: 2.2rem;
             font-weight: 800;
             font-family: 'Outfit', sans-serif;
             letter-spacing: 0.5px;
@@ -128,17 +147,19 @@
             line-height: 1;
             text-transform: uppercase;
             text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.8);
+            margin: 0;
         }
 
         .brand-title-wrap h2 {
-            font-size: 1.9rem;
+            font-size: 2.2rem;
             font-weight: 800;
             font-family: 'Outfit', sans-serif;
             color: var(--primary-orange);
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            line-height: 1.1;
+            line-height: 1;
             text-shadow: 0 3px 14px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 85, 0, 0.4);
+            margin: 0;
         }
 
         .brand-subtitle {
@@ -314,12 +335,23 @@
         }
 
         .shield-badge {
-            width: 66px;
-            height: 66px;
+            width: 72px;
+            height: 72px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .shield-logo-img {
+            max-width: 68px;
+            max-height: 68px;
+            object-fit: contain;
+            border-radius: 14px;
+            filter: drop-shadow(0 4px 14px rgba(255, 106, 0, 0.45));
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px;
+            border: 1px solid rgba(255, 106, 0, 0.3);
         }
 
         .shield-badge svg {
@@ -524,6 +556,7 @@
             font-size: 0.82rem;
             color: #94a3b8;
             font-weight: 500;
+            margin-top: 28px;
         }
 
         .security-badge i {
@@ -561,44 +594,79 @@
             gap: 10px;
         }
 
-        /* RESPONSIVE */
+        /* RESPONSIVE: En tablets y móviles solo se muestra el formulario a 100vh */
         @media (max-width: 1024px) {
-            .content-container {
-                flex-direction: column;
-                height: auto;
-                padding: 40px 24px;
-                justify-content: center;
-                align-items: center;
+            body {
+                overflow-y: auto;
             }
             .brand-section {
-                padding-right: 0;
-                margin-bottom: 35px;
-                text-align: center;
-                align-items: center;
+                display: none !important;
             }
-            .brand-header {
+            .brand-vignette {
+                display: none !important;
+            }
+            .content-container {
+                height: 100vh;
+                min-height: 100dvh;
+                padding: 16px;
+                display: flex;
                 justify-content: center;
-            }
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
+                align-items: center;
             }
             .login-section {
                 padding-right: 0;
+                display: flex;
                 justify-content: center;
+                align-items: center;
                 width: 100%;
+                max-width: 500px;
+                margin: auto;
+            }
+            .login-card-container {
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+            }
+            .login-card {
+                padding: 38px 30px;
+                border-radius: 22px;
             }
         }
 
-        @media (max-width: 576px) {
-            .features-grid {
-                display: none;
+        @media (max-width: 480px) {
+            .content-container {
+                padding: 10px;
             }
-            .brand-footer {
-                display: none;
+            .login-section {
+                max-width: 100%;
+            }
+            .login-card-container {
+                border-radius: 20px;
             }
             .login-card {
-                padding: 34px 24px;
-                border-radius: 20px;
+                padding: 28px 18px;
+                border-radius: 18px;
+            }
+            .shield-icon-wrap {
+                margin-bottom: 14px;
+            }
+            .shield-badge {
+                width: 56px;
+                height: 56px;
+            }
+            .login-title {
+                font-size: 1.55rem;
+            }
+            .login-sub {
+                margin-bottom: 22px;
+                font-size: 0.84rem;
+            }
+            .input-group-dark {
+                padding: 2px 14px;
+                margin-bottom: 14px;
+            }
+            .security-badge {
+                margin-top: 20px;
             }
         }
     </style>
@@ -650,8 +718,10 @@
                         $firstWord = $brandWords[0] ?? 'Taller';
                         $secondWord = $brandWords[1] ?? 'Pro';
                         ?>
-                        <h1><?= htmlspecialchars($firstWord) ?></h1>
-                        <h2><?= htmlspecialchars($secondWord) ?></h2>
+                        <div class="title-row">
+                            <h1><?= htmlspecialchars($firstWord) ?></h1>
+                            <h2><?= htmlspecialchars($secondWord) ?></h2>
+                        </div>
                         <div class="brand-subtitle">Sistema de Gestión</div>
                     </div>
                 </div>
@@ -692,16 +762,23 @@
         <div class="login-section">
             <div class="login-card-container">
                 <div class="login-card">
-                    <!-- Escudo con Engranaje -->
+                    <!-- Logo / Escudo del Taller -->
                     <div class="shield-icon-wrap">
                         <div class="shield-badge">
-                            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M50 10L82 22V50C82 70 68 86 50 92C32 86 18 70 18 50V22L50 10Z" fill="rgba(24, 34, 54, 0.8)" stroke="#38BDF8" stroke-width="2.5"/>
-                                <!-- Engranaje interior naranja vibrante -->
-                                <circle cx="50" cy="50" r="14" fill="#FF5500"/>
-                                <circle cx="50" cy="50" r="6" fill="#0B111E"/>
-                                <path d="M47 30H53V36H47V30ZM47 64H53V70H47V64ZM64 47H70V53H64V47ZM30 47H36V53H30V47Z" fill="#FF5500"/>
-                            </svg>
+                            <?php 
+                            $cardLogoPath = !empty($sistema->logo) ? __DIR__ . '/../../../public/uploads/logo/' . $sistema->logo : null;
+                            if (!empty($sistema->logo) && file_exists($cardLogoPath)): 
+                            ?>
+                                <img src="/uploads/logo/<?= htmlspecialchars($sistema->logo) ?>" alt="<?= htmlspecialchars($sistema->nombre_sistema ?? 'Taller') ?>" class="shield-logo-img">
+                            <?php else: ?>
+                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M50 10L82 22V50C82 70 68 86 50 92C32 86 18 70 18 50V22L50 10Z" fill="rgba(24, 34, 54, 0.8)" stroke="#38BDF8" stroke-width="2.5"/>
+                                    <!-- Engranaje interior naranja vibrante -->
+                                    <circle cx="50" cy="50" r="14" fill="#FF5500"/>
+                                    <circle cx="50" cy="50" r="6" fill="#0B111E"/>
+                                    <path d="M47 30H53V36H47V30ZM47 64H53V70H47V64ZM64 47H70V53H64V47ZM30 47H36V53H30V47Z" fill="#FF5500"/>
+                                </svg>
+                            <?php endif; ?>
                         </div>
                     </div>
 

@@ -6,10 +6,10 @@
             <?php echo strtoupper(substr($cliente->nombre, 0, 1)); ?>
         </div>
         <div>
-            <h2 class="mb-0"><?php echo $cliente->nombre; ?></h2>
+            <h2 class="mb-0"><?php echo htmlspecialchars($cliente->nombre); ?></h2>
             <div class="text-muted small">
-                <i class="fa-solid fa-envelope me-1"></i> <?php echo $cliente->email ?: 'Sin email'; ?> | 
-                <i class="fa-solid fa-phone me-1"></i> <?php echo $cliente->telefono ?: 'Sin teléfono'; ?>
+                <i class="fa-solid fa-envelope me-1"></i> <?php echo htmlspecialchars($cliente->email ?: 'Sin email'); ?> | 
+                <i class="fa-solid fa-phone me-1"></i> <?php echo htmlspecialchars($cliente->telefono ?: 'Sin teléfono'); ?>
             </div>
         </div>
     </div>
@@ -52,17 +52,17 @@
     <div class="card-header bg-white">
         <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
             <li class="nav-item">
-                <button class="nav-link active" id="ordenes-tab" data-bs-toggle="tab" data-bs-target="#ordenes" type="button">
-                    <i class="fa-solid fa-screwdriver-wrench me-2"></i> Historial de Servicios
+                <button class="nav-link <?= ($tabActiva === 'ordenes') ? 'active' : '' ?>" id="ordenes-tab" data-bs-toggle="tab" data-bs-target="#ordenes" type="button">
+                    <i class="fa-solid fa-screwdriver-wrench me-2"></i> Historial de Servicios (<?= $paginationOrdenes['totalRegistros'] ?>)
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" id="ventas-tab" data-bs-toggle="tab" data-bs-target="#ventas" type="button">
-                    <i class="fa-solid fa-cart-shopping me-2"></i> Historial de Compras
+                <button class="nav-link <?= ($tabActiva === 'ventas') ? 'active' : '' ?>" id="ventas-tab" data-bs-toggle="tab" data-bs-target="#ventas" type="button">
+                    <i class="fa-solid fa-cart-shopping me-2"></i> Historial de Compras (<?= $paginationVentas['totalRegistros'] ?>)
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button">
+                <button class="nav-link <?= ($tabActiva === 'info') ? 'active' : '' ?>" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button">
                     <i class="fa-solid fa-user-gear me-2"></i> Datos Personales
                 </button>
             </li>
@@ -71,7 +71,8 @@
     <div class="card-body">
         <div class="tab-content" id="myTabContent">
             
-            <div class="tab-pane fade show active" id="ordenes">
+            <!-- PESTAÑA: HISTORIAL DE SERVICIOS -->
+            <div class="tab-pane fade <?= ($tabActiva === 'ordenes') ? 'show active' : '' ?>" id="ordenes">
                 <?php if(empty($ordenes)): ?>
                     <div class="text-center py-5 text-muted">
                         <i class="fa-solid fa-clipboard-list fa-3x mb-3 opacity-25"></i>
@@ -79,7 +80,7 @@
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Ticket</th>
@@ -101,8 +102,8 @@
                                     <tr>
                                         <td><strong>ORD-<?php echo str_pad($o->id, 4, '0', STR_PAD_LEFT); ?></strong></td>
                                         <td>
-                                            <strong><?php echo $o->equipo_tipo . ' ' . $o->equipo_marca; ?></strong><br>
-                                            <small class="text-muted"><?php echo $o->falla_reportada; ?></small>
+                                            <strong><?php echo htmlspecialchars($o->equipo_tipo . ' ' . $o->equipo_marca); ?></strong><br>
+                                            <small class="text-muted"><?php echo htmlspecialchars($o->falla_reportada); ?></small>
                                         </td>
                                         <td><?php echo date('d/m/Y', strtotime($o->fecha_recepcion)); ?></td>
                                         <td><span class="badge <?php echo $badge; ?>"><?php echo ucfirst($o->estado); ?></span></td>
@@ -115,10 +116,41 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Paginación de Servicios (10 en 10) -->
+                    <?php if ($paginationOrdenes['totalPaginas'] > 1): ?>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <small class="text-muted">
+                                Mostrando <?php echo (($paginationOrdenes['pagina'] - 1) * 10) + 1; ?> al 
+                                <?php echo min($paginationOrdenes['pagina'] * 10, $paginationOrdenes['totalRegistros']); ?> 
+                                de <?php echo $paginationOrdenes['totalRegistros']; ?> servicios
+                            </small>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item <?= ($paginationOrdenes['pagina'] <= 1) ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="/clientes/perfil?id=<?= $cliente->id ?>&tab=ordenes&page_ordenes=<?= $paginationOrdenes['pagina'] - 1 ?>">
+                                            <i class="fa-solid fa-chevron-left"></i> Anterior
+                                        </a>
+                                    </li>
+                                    <?php for($p = 1; $p <= $paginationOrdenes['totalPaginas']; $p++): ?>
+                                        <li class="page-item <?= ($p === $paginationOrdenes['pagina']) ? 'active' : '' ?>">
+                                            <a class="page-link" href="/clientes/perfil?id=<?= $cliente->id ?>&tab=ordenes&page_ordenes=<?= $p ?>"><?= $p ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    <li class="page-item <?= ($paginationOrdenes['pagina'] >= $paginationOrdenes['totalPaginas']) ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="/clientes/perfil?id=<?= $cliente->id ?>&tab=ordenes&page_ordenes=<?= $paginationOrdenes['pagina'] + 1 ?>">
+                                            Siguiente <i class="fa-solid fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
 
-            <div class="tab-pane fade" id="ventas">
+            <!-- PESTAÑA: HISTORIAL DE COMPRAS -->
+            <div class="tab-pane fade <?= ($tabActiva === 'ventas') ? 'show active' : '' ?>" id="ventas">
                 <?php if(empty($ventas)): ?>
                     <div class="text-center py-5 text-muted">
                         <i class="fa-solid fa-basket-shopping fa-3x mb-3 opacity-25"></i>
@@ -126,7 +158,7 @@
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Ticket Venta</th>
@@ -149,27 +181,58 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Paginación de Compras (10 en 10) -->
+                    <?php if ($paginationVentas['totalPaginas'] > 1): ?>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <small class="text-muted">
+                                Mostrando <?php echo (($paginationVentas['pagina'] - 1) * 10) + 1; ?> al 
+                                <?php echo min($paginationVentas['pagina'] * 10, $paginationVentas['totalRegistros']); ?> 
+                                de <?php echo $paginationVentas['totalRegistros']; ?> compras
+                            </small>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item <?= ($paginationVentas['pagina'] <= 1) ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="/clientes/perfil?id=<?= $cliente->id ?>&tab=ventas&page_ventas=<?= $paginationVentas['pagina'] - 1 ?>">
+                                            <i class="fa-solid fa-chevron-left"></i> Anterior
+                                        </a>
+                                    </li>
+                                    <?php for($p = 1; $p <= $paginationVentas['totalPaginas']; $p++): ?>
+                                        <li class="page-item <?= ($p === $paginationVentas['pagina']) ? 'active' : '' ?>">
+                                            <a class="page-link" href="/clientes/perfil?id=<?= $cliente->id ?>&tab=ventas&page_ventas=<?= $p ?>"><?= $p ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+                                    <li class="page-item <?= ($paginationVentas['pagina'] >= $paginationVentas['totalPaginas']) ? 'disabled' : '' ?>">
+                                        <a class="page-link" href="/clientes/perfil?id=<?= $cliente->id ?>&tab=ventas&page_ventas=<?= $paginationVentas['pagina'] + 1 ?>">
+                                            Siguiente <i class="fa-solid fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
 
-            <div class="tab-pane fade" id="info">
+            <!-- PESTAÑA: DATOS PERSONALES -->
+            <div class="tab-pane fade <?= ($tabActiva === 'info') ? 'show active' : '' ?>" id="info">
                 <form action="/clientes/actualizar" method="POST" class="row g-3">
                     <input type="hidden" name="id" value="<?php echo $cliente->id; ?>">
                     <div class="col-md-6">
                         <label class="form-label">Nombre Completo</label>
-                        <input type="text" class="form-control" name="nombre" value="<?php echo $cliente->nombre; ?>">
+                        <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($cliente->nombre); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" name="telefono" value="<?php echo $cliente->telefono; ?>">
+                        <input type="text" class="form-control" name="telefono" value="<?php echo htmlspecialchars($cliente->telefono); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" value="<?php echo $cliente->email; ?>">
+                        <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($cliente->email); ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Dirección</label>
-                        <input type="text" class="form-control" name="direccion" value="<?php echo $cliente->direccion; ?>">
+                        <input type="text" class="form-control" name="direccion" value="<?php echo htmlspecialchars($cliente->direccion); ?>">
                     </div>
                     <div class="col-12 text-end">
                         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-2"></i> Actualizar Datos</button>

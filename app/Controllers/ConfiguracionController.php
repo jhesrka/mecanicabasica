@@ -80,6 +80,20 @@ class ConfiguracionController extends BaseController {
                             \imagepng($lienzoNuevo, $carpetaDestino . $nombreArchivo, 8);
                         }
 
+                        // Sincronizar Favicon físico en /public/
+                        $publicRoot = __DIR__ . '/../../public/';
+                        $lienzoFavicon = \imagecreatetruecolor(64, 64);
+                        \imagealphablending($lienzoFavicon, false);
+                        \imagesavealpha($lienzoFavicon, true);
+                        $transFav = \imagecolorallocatealpha($lienzoFavicon, 255, 255, 255, 127);
+                        \imagefilledrectangle($lienzoFavicon, 0, 0, 64, 64, $transFav);
+                        \imagecopyresampled($lienzoFavicon, $lienzoNuevo, 0, 0, 0, 0, 64, 64, $nuevoAncho, $nuevoAlto);
+                        if (function_exists('imagepng')) {
+                            \imagepng($lienzoFavicon, $publicRoot . 'favicon.png', 8);
+                            \imagepng($lienzoFavicon, $publicRoot . 'favicon.ico', 8);
+                        }
+                        \imagedestroy($lienzoFavicon);
+
                         \imagedestroy($recursoOrigen);
                         \imagedestroy($lienzoNuevo);
 

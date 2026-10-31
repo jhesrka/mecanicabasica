@@ -48,6 +48,18 @@
         // Arreglo para que Select2 funcione dentro de Modals de Bootstrap
         // (Por defecto, el buscador del select2 se rompe en los modales)
         $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+
+        // 3. Feedback visual interactivo en formularios ("Guardando...")
+        $(document).on('submit', 'form', function () {
+            const $form = $(this);
+            const $btn = $form.find('button[type="submit"]:focus, button[type="submit"]:last');
+            if ($btn.length && !$btn.prop('disabled')) {
+                setTimeout(function () {
+                    $btn.prop('disabled', true);
+                    $btn.html('<i class="fa-solid fa-circle-notch fa-spin me-2"></i><span>Guardando...</span>');
+                }, 10);
+            }
+        });
     });
 </script>
 

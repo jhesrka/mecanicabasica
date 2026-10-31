@@ -22,7 +22,7 @@ class Cliente extends BaseModel {
         } catch (\Exception $e) { return null; }
     }
 
-    // --- NUEVO: Historial de Órdenes del cliente ---
+    // --- Historial de Órdenes del cliente (Total y Paginado) ---
     public function getOrdenes($clienteId) {
         try {
             $sql = "SELECT * FROM ordenes_servicio WHERE cliente_id = :id ORDER BY fecha_recepcion DESC";
@@ -32,7 +32,24 @@ class Cliente extends BaseModel {
         } catch (\Exception $e) { return []; }
     }
 
-    // --- NUEVO: Historial de Ventas (POS) del cliente ---
+    public function getOrdenesPaginadas($clienteId, $pagina = 1, $limite = 10) {
+        try {
+            $offset = ($pagina - 1) * $limite;
+            $sql = "SELECT * FROM ordenes_servicio WHERE cliente_id = :id ORDER BY fecha_recepcion DESC LIMIT :limite OFFSET :offset";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', (int)$clienteId, PDO::PARAM_INT);
+            $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (\Exception $e) { return []; }
+    }
+
+    public function countOrdenesTotal($clienteId) {
+        return (int)$this->countOrdenes($clienteId);
+    }
+
+    // --- Historial de Ventas (POS) del cliente (Total y Paginado) ---
     public function getVentas($clienteId) {
         try {
             $sql = "SELECT * FROM ventas WHERE cliente_id = :id ORDER BY fecha DESC";
@@ -42,7 +59,24 @@ class Cliente extends BaseModel {
         } catch (\Exception $e) { return []; }
     }
 
-    // --- NUEVO: Estadísticas Financieras (LTV - Lifetime Value) ---
+    public function getVentasPaginadas($clienteId, $pagina = 1, $limite = 10) {
+        try {
+            $offset = ($pagina - 1) * $limite;
+            $sql = "SELECT * FROM ventas WHERE cliente_id = :id ORDER BY fecha DESC LIMIT :limite OFFSET :offset";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':id', (int)$clienteId, PDO::PARAM_INT);
+            $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+        } catch (\Exception $e) { return []; }
+    }
+
+    public function countVentasTotal($clienteId) {
+        return (int)$this->countVentas($clienteId);
+    }
+
+    // --- Estadísticas Financieras (LTV - Lifetime Value) ---
     public function getEstadisticas($clienteId) {
         try {
             // 1. Total gastado en Servicios (Órdenes no canceladas)

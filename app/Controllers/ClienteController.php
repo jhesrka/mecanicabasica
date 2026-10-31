@@ -15,7 +15,7 @@ class ClienteController extends BaseController {
         ]);
     }
 
-    // --- NUEVO: Ver Perfil 360 del Cliente ---
+    // --- NUEVO: Ver Perfil 360 del Cliente (Paginación 10 en 10) ---
     public function perfil() {
         $id = $_GET['id'] ?? null;
         if (!$id) { header('Location: /clientes'); exit; }
@@ -25,17 +25,44 @@ class ClienteController extends BaseController {
 
         if (!$cliente) { header('Location: /clientes'); exit; }
 
-        // Obtenemos toda la data relacionada
-        $ordenes = $clienteModel->getOrdenes($id);
-        $ventas = $clienteModel->getVentas($id);
+        $limite = 10;
+        
+        // Paginación Órdenes (Servicios)
+        $pageOrdenes = max(1, (int)($_GET['page_ordenes'] ?? 1));
+        $totalOrdenes = $clienteModel->countOrdenesTotal($id);
+        $totalPaginasOrdenes = max(1, (int)ceil($totalOrdenes / $limite));
+        if ($pageOrdenes > $totalPaginasOrdenes) $pageOrdenes = $totalPaginasOrdenes;
+        $ordenes = $clienteModel->getOrdenesPaginadas($id, $pageOrdenes, $limite);
+
+        // Paginación Ventas (Compras)
+        $pageVentas = max(1, (int)($_GET['page_ventas'] ?? 1));
+        $totalVentas = $clienteModel->countVentasTotal($id);
+        $totalPaginasVentas = max(1, (int)ceil($totalVentas / $limite));
+        if ($pageVentas > $totalPaginasVentas) $pageVentas = $totalPaginasVentas;
+        $ventas = $clienteModel->getVentasPaginadas($id, $pageVentas, $limite);
+
         $stats = $clienteModel->getEstadisticas($id);
+        $tabActiva = $_GET['tab'] ?? 'ordenes';
 
         $this->view('clientes/perfil', [
             'titulo' => 'Perfil: ' . $cliente->nombre,
             'cliente' => $cliente,
             'ordenes' => $ordenes,
             'ventas' => $ventas,
-            'stats' => $stats
+            'stats' => $stats,
+            'tabActiva' => $tabActiva,
+            'paginationOrdenes' => [
+                'pagina' => $pageOrdenes,
+                'totalPaginas' => $totalPaginasOrdenes,
+                'totalRegistros' => $totalOrdenes,
+                'limite' => $limite
+            ],
+            'paginationVentas' => [
+                'pagina' => $pageVentas,
+                'totalPaginas' => $totalPaginasVentas,
+                'totalRegistros' => $totalVentas,
+                'limite' => $limite
+            ]
         ]);
     }
 
