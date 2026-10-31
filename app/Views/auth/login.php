@@ -750,21 +750,11 @@
                         </button>
                     </form>
 
-                    <!-- Divisor -->
-                    <div class="card-divider">
-                        <span>Acceso exclusivo para administradores</span>
-                    </div>
-
                     <!-- Candado de Seguridad -->
                     <div class="security-badge">
                         <i class="fa-solid fa-lock"></i>
                         <span>Sistema seguro y protegido</span>
                     </div>
-
-                    <!-- Enlace a Rastreo de Órdenes -->
-                    <a href="/rastreo" class="rastreo-link">
-                        <i class="fa-solid fa-magnifying-glass me-1"></i> ¿Eres cliente? Consulta el estado de tu vehículo
-                    </a>
                 </div>
             </div>
         </div>
